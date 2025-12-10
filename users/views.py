@@ -10,5 +10,3 @@ class SignUpView(APIView):
         serializer.save()
         return Response({'message:' 'Registration successful', 201})
     
-
-class SignInView()
