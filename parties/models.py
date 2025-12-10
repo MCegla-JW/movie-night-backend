@@ -3,7 +3,7 @@ from django.db import models
 # Create your models here.
 class Party(models.Model):
     title = models.CharField(max_length=100, unique=True)
-    join_code = models.URLField(unique=True)
+    join_code = models.CharField(max_length=100, unique=True)
     date = models.DateField()
     creator = models.ForeignKey(
         to='users.User',

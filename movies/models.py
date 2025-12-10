@@ -5,10 +5,10 @@ class Movie(models.Model):
     tmdb_id = models.IntegerField(unique=True)
     title = models.CharField(max_length=100)
     poster = models.URLField(blank=True, null=True)
-    release_date = models.DateField()
+    release_date = models.IntegerField()
 
-def __str__(self):
-    return self.title
+    def __str__(self):
+        return self.title
 
 class Watchlist(models.Model):
     user = models.ForeignKey(
@@ -23,5 +23,5 @@ class Watchlist(models.Model):
     )
     is_watched = models.BooleanField(default=False)
 
-def __str__(self):
-    return f'{self.user.username} added {self.movie.title} to watchlist'
+    def __str__(self):
+        return f'{self.user.username} added {self.movie.title} to watchlist'
