@@ -1,10 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 import requests
 from django.conf import settings
 
 # Create your views here.
+
+## MOVIE ROUTES 
 
 #URL: /movies 
 # INDEX ROUTE - show popular movies - MOVIE INDEX
@@ -49,3 +51,5 @@ class MovieDetailsView(APIView):
         data = response.json()
         print(data)
         return Response({'movie': data}, status=200)
+    
+
