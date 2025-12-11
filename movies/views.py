@@ -25,12 +25,27 @@ class MoviesView(APIView):
             url = f'{search_url}?api_key={API_KEY}&query={search_query}'
         else:
             url = f'{base_url}&api_key={API_KEY}'
-        print({'search_query': search_query})
-        print({'URL': url})
         response = requests.get(url, headers=headers)
-        print({'response': response.status_code})
-        print({'response': response.json()})
         data = response.json().get('results',[])
         print(data)
         return Response({'movies': data, 'search': search_query}, status=200)
     
+# MOVIE SHOW - get one movie 
+# URL /movies/:pk
+
+class MovieDetailsView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def get(self, request, pk):
+        API_KEY = settings.TMDB_API_KEY
+        TMDB_BEARER_TOKEN = settings.TMDB_BEARER_TOKEN
+        base_url = 'https://api.themoviedb.org/3/movie/'
+        movie_id = pk
+        headers = {
+        "accept": "application/json",
+        "Authorization": TMDB_BEARER_TOKEN}
+        url = f'{base_url}{movie_id}?api_key={API_KEY}'
+        response = requests.get(url, headers=headers)
+        data = response.json()
+        print(data)
+        return Response({'movie': data}, status=200)
