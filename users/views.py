@@ -15,5 +15,8 @@ class AccountView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        # user = request.user - user Model
+        # print(user.username) - prints: 'test'
+        # print(user.email) - prints: 'email@email.com'
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
