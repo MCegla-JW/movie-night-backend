@@ -27,12 +27,12 @@ class PartyIndex(APIView):
         return Response(serializer.data, 200)
     
     def post(self, request): 
-        request.data['creator'] = request.user
-        request.data['join_code'] = uuid.uuid4()
         serializer = PartySerializer(data=request.data)
         is_valid = serializer.is_valid(raise_exception=True)
         print(serializer._validated_data)
-        serializer.save(creator = request.user, join_code = uuid.uuid4())
+        created_party = serializer.save(creator = request.user, join_code = uuid.uuid4())
+        creator = request.user
+        created_party.members.add(creator)
         return Response(serializer.data, 201)
 
 
@@ -40,4 +40,4 @@ class PartyIndex(APIView):
     #     permission_classes = [IsAuthenticated]
 
     #     # helper function 
-    #     def get_party_item(self, pk)
+    #     def get_party_item(self, pk):
