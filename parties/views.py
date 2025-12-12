@@ -27,6 +27,7 @@ class PartyIndex(APIView):
         serializer = PartySerializer(parties, many=True)
         return Response(serializer.data, 200)
     
+    # Create a party
     def post(self, request): 
         serializer = PartySerializer(data=request.data)
         is_valid = serializer.is_valid(raise_exception=True)
@@ -50,14 +51,43 @@ class PartyIndex(APIView):
         'added_by_user': creator.id
         }
         serializer_party_movie = PartyMovieSerializer(data=data)
+        if PartyMovie.objects.filter(party=created_party, movie=movie_to_add.movie).exists():
+            return Response({'message': 'Cannot add duplicate movies. Movie aleady in party'})
         is_valid = serializer_party_movie.is_valid(raise_exception=True)
         party_movie = serializer_party_movie.save()
         updated_serializer = PartySerializer(created_party)
         return Response(updated_serializer.data, 201)
 
 
-    # class PartyItemsView(APIView):
-    #     permission_classes = [IsAuthenticated]
+class PartyItemsView(APIView):
+    permission_classes = [IsAuthenticated]
 
-    #     # helper function 
-    #     def get_party_item(self, pk):
+    # helper function 
+    def get_party_item(self, pk):
+        try:
+            return Party.objects.get(pk=pk)
+        except Party.DoesNotExist:
+            raise NotFound('Party does not exist')
+    
+    # Get a single party
+    def get(self, request, pk):
+        party = self.get_party_item(pk)
+        serializer = PartySerializer(party)
+        return Response(serializer.data, 201)
+    
+    # Update a party
+    def put(self, request, pk):
+        party = self.get_party_item(pk)
+        self.check_object_permissions(request, party)
+        serializer = PartySerializer(data=request.data, instance=party)
+        is_valid = serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
+    
+    # Delete 
+    def delete(self, request, pk):
+        party = self.get_party_item(pk)
+        party.delete()
+        return Response({'message': 'Party was deleted successfully'}, 204)
+    
+

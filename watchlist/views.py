@@ -18,7 +18,7 @@ class WatchlistIndex(APIView):
         # filter Watchlist table to only show logged in users movies 
         watchlist = Watchlist.objects.filter(user = request.user.id)
         serializer = WatchlistSerializer(watchlist, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, 200)
 
 
 class WatchlistItemsView(APIView):
@@ -59,7 +59,7 @@ class WatchlistItemsView(APIView):
         watchlist_item, created = Watchlist.objects.get_or_create(user=request.user, movie=movie, defaults={'is_watched': False})
         serializer = WatchlistSerializer(watchlist_item)
         if created:
-            return Response({'Added to watchlist': serializer.data})
+            return Response({'Added to watchlist': serializer.data}, 201)
         else: 
             return Response({'message': 'Movie already in Watchlist'})
     
@@ -77,4 +77,4 @@ class WatchlistItemsView(APIView):
     def delete(self, request, pk):
         watchlist_item = self.get_watchlist_item(pk)
         watchlist_item.delete()
-        return Response({'message': 'Movie was deleted'}, status=204)
+        return Response({'message': 'Movie was deleted'}, 204)
