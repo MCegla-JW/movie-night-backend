@@ -69,10 +69,9 @@ class WatchlistItemsView(APIView):
         # if watched, delete 
         if request.data.get('is_watched') is True:
             watchlist_item.delete()
-            return Response({'message': 'Movie removed from your watchlist'})
-        else: 
-            # if not wachted, keep in watchlist 
-            return Response({'message': 'Movie is not watched. Keep in watchlist'})
+            return Response({'message': 'Movie removed from your watchlist and marked as watched '})
+        # if not wachted, keep in watchlist 
+        return Response({'message': 'Movie is not watched. Keep in watchlist'})
     
     # Delete movie from watchlist 
     def delete(self, request, pk):
