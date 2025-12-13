@@ -7,6 +7,7 @@ from .serializers.common import PartySerializer, PartyMovieSerializer
 from django.db.models import Q
 import uuid
 from movies.models import Watchlist
+from django.shortcuts import get_object_or_404
 
 # Create your views here.
 ## PARTY ROUTES 
@@ -87,7 +88,39 @@ class PartyItemsView(APIView):
     # Delete 
     def delete(self, request, pk):
         party = self.get_party_item(pk)
+        self.check_object_permissions(request, party)
         party.delete()
         return Response({'message': 'Party was deleted successfully'}, 204)
     
+# Join party 
+# Path - /parties/<int:pk>/join/
+
+class PartyJoinView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, join_code):
+        # party object 
+        # pk is party id
+        # verify party exists
+        party = get_object_or_404(Party, join_code=join_code)
+        print(party)
+        print(party.members.all())
+        print(party.members.exists())
+        print(party.members.count())
+        user_to_join = request.user
+        users_in_party = party.members.filter(id = user_to_join.id).exists()
+        print(users_in_party)
+        # verify user member or not 
+        if users_in_party:
+            return Response({'message': 'Party member already exists'})
+        party.members.add(user_to_join)
+        movie_to_add = Watchlist.objects.filter(user = request.user.id).order_by("?").first()
+        if not movie_to_add:
+            return Response({'message': 'Watchlist empty. Add movies first'})
+        party_movie, created = PartyMovie.objects.get_or_create(party=party, movie=movie_to_add.movie, defaults={'added_by_user': user_to_join})
+        if not created:
+            return Response({'message': 'Cannot add duplicate movies. Movie aleady in party'})
+        return Response({'message': 'User joined party'})
+
+        
 

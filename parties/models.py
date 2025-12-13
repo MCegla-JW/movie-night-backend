@@ -36,6 +36,9 @@ class PartyMovie(models.Model):
         on_delete=models.CASCADE
     )
 
+    class Meta:
+        unique_together = ('party', 'movie')
+
     def __str__(self):
         return f'{self.movie.title} in {self.party.title}'
 
