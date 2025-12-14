@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Party, PartyMovie, Vote
 from rest_framework.exceptions import NotFound
 from .serializers.common import PartySerializer, PartyMovieSerializer
-from django.db.models import Q
+from django.db.models import Q, Count, Max
 import uuid
 from movies.models import Watchlist
 from django.shortcuts import get_object_or_404
@@ -149,9 +149,17 @@ class VotesIndexView(APIView):
         # Get all party members 
         party_members = party.members.all()
         print(party_members)
-        # Get all movies 
+        # Get all movies in this party
         party_movies = PartyMovie.objects.filter(party=party)
-        serializer = PartyMovieSerializer(party_movies, many=True)
+        print(party_movies)
+        # count votes for each movie
+        for party_movie in party_movies:
+            party_movie.num_votes = Vote.objects.filter(party=party, movie=party_movie.movie).count()
+        # find highest vote count
+        max_votes = 0
+        if party_movies:
+            max_votes = max(pm.num_votes for pm in party_movies)
+        serializer = PartyMovieSerializer(party_movies, many=True, context={'max_votes': max_votes})
         return Response({'Movies in party': serializer.data})
     
 class CastVotesView(APIView):
@@ -159,8 +167,9 @@ class CastVotesView(APIView):
 
     def post(self, request, party_id, movie_id):
         party = get_object_or_404(Party, id=party_id)
-        party_movies = PartyMovie.objects.filter(party=party)
-        # serializer = PartyMovieSerializer(party_movies, many=True)
+        party_movies = PartyMovie.objects.filter(party=party, movie_id=movie_id)
+        if not party_movies:
+            return Response({'message': 'This movie is not in this party'}, 400)
         voting_user = request.user
         print(party)
         print(party_movies)
