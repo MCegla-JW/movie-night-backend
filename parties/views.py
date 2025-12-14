@@ -174,5 +174,8 @@ class CastVotesView(APIView):
         party = get_object_or_404(Party, id=party_id)
         party_movies = PartyMovie.objects.filter(party=party)
         voting_user = request.user
-        unvote = Vote.objects.get(user=voting_user, party=party, movie_id=movie_id).delete()
-        return Response({'message': 'Vote removed successfully'})
+        unvote = Vote.objects.filter(user=voting_user, party=party, movie_id=movie_id).exists()
+        if unvote:
+            vote_to_delete = Vote.objects.get(user=voting_user, party=party, movie_id=movie_id).delete()
+            return Response({'message': 'Vote removed successfully'})
+        return Response({'message': 'Already unvoted'})
