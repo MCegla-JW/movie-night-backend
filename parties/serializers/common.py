@@ -30,5 +30,7 @@ class PartyMovieSerializer(ModelSerializer):
         def get_is_winner(self, obj):
             # Votes per movie
             max_votes = self.context.get('max_votes', 0)
-            return getattr(obj, 'num_votes', 0) == max_votes
+            if max_votes == 0:
+                 return False
+            return obj.num_votes == max_votes
 

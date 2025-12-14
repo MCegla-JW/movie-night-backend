@@ -8,6 +8,7 @@ from django.db.models import Q, Count, Max
 import uuid
 from movies.models import Watchlist
 from django.shortcuts import get_object_or_404
+import random
 
 # Create your views here.
 ## PARTY ROUTES 
@@ -54,8 +55,9 @@ class PartyIndex(APIView):
         serializer_party_movie = PartyMovieSerializer(data=data)
         if PartyMovie.objects.filter(party=created_party, movie=movie_to_add.movie).exists():
             return Response({'message': 'Cannot add duplicate movies. Movie aleady in party'})
+        movie_to_add, created = PartyMovie.objects.get_or_create(party=created_party, movie=movie_to_add.movie, defaults={'added_by_user': request.user})
         is_valid = serializer_party_movie.is_valid(raise_exception=True)
-        party_movie = serializer_party_movie.save()
+        # movie_to_add = serializer_party_movie.save()
         updated_serializer = PartySerializer(created_party)
         return Response(updated_serializer.data, 201)
 
@@ -146,9 +148,6 @@ class VotesIndexView(APIView):
         # Get party
         party = get_object_or_404(Party, pk=pk)
         print(party)
-        # Get all party members 
-        party_members = party.members.all()
-        print(party_members)
         # Get all movies in this party
         party_movies = PartyMovie.objects.filter(party=party)
         print(party_movies)
@@ -159,8 +158,83 @@ class VotesIndexView(APIView):
         max_votes = 0
         if party_movies:
             max_votes = max(pm.num_votes for pm in party_movies)
-        serializer = PartyMovieSerializer(party_movies, many=True, context={'max_votes': max_votes})
-        return Response({'Movies in party': serializer.data})
+        # find all movies with max votes
+        tied_movies = [pm for pm in party_movies if pm.num_votes == max_votes]
+        # decide winner state
+        winner = None
+        if max_votes > 0:
+            if len(tied_movies) == 1:
+                winner = {
+                    'status': 'clear winner',
+                    'movie_id': tied_movies[0].movie.id,
+                    'movie_title': tied_movies[0].movie.title,
+                    'votes': max_votes
+                }
+            else:
+                winner = {
+                    'status': 'tie',
+                    'votes': max_votes,
+                    'tied_movies': [
+                        {
+                            'movie_id': pm.movie.id,
+                            'movie_title': pm.movie.title
+                        }
+                        for pm in tied_movies
+                    ]
+                }    
+        serializer = PartyMovieSerializer(party_movies, many=True,context={'max_votes': max_votes})
+        return Response({'movies': serializer.data, 'winner': winner, 'is_creator': request.user == party.creator})
+    
+class BreakTieView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request, pk):
+        party = get_object_or_404(Party, pk=pk)
+
+        # Only creator can break tie
+        if request.user != party.creator:
+            return Response(
+                {'error': 'Only the party creator can break ties'},
+                status=403
+            )
+
+        # Make sure movie belongs to this party
+        party_movies = PartyMovie.objects.filter(party=party)
+
+        if not party_movies:
+            return Response(
+                {'error': 'No movies in party'},
+                status=400
+            )
+
+        # Count votes for each movie
+        for party_movie in party_movies:
+            party_movie.num_votes = Vote.objects.filter(party=party, movie=party_movie.movie).count()
+
+        # Find max votes 
+        max_votes = max(pm.num_votes for pm in party_movies)
+        # Find all movies with max votes (tied movies)
+        tied_movies = [pm for pm in party_movies if pm.num_votes == max_votes]
+        # Validate there is a tie 
+        if len(tied_movies) <= 1:
+            return Response(
+                {'error': 'No tie to break - there is a clear winner'},
+                status=400
+            )
+        # random selection of winner from tie
+        winner = random.choice(tied_movies)
+        # set winner 
+        party.winning_movie = winner.movie
+        party.save()
+        return Response({
+            'message': 'Tie broken successfully',
+            'winning_movie': {
+                'id': winner.movie.id,
+                'title': winner.movie.title,
+                'votes': max_votes
+            }
+        })
+
     
 class CastVotesView(APIView):
     permission_classes = [IsAuthenticated]

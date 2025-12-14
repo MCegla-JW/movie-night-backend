@@ -14,6 +14,13 @@ class Party(models.Model):
         to='users.User',
         related_name='parties'
     )
+    winning_movie = models.ForeignKey(
+        to='movies.Movie',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL, 
+        related_name='won_parties'
+    )
 
     def __str__(self):
         return self.title
