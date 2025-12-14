@@ -123,4 +123,18 @@ class PartyJoinView(APIView):
         return Response({'message': 'User joined party'})
 
         
+class PartyMovieIndex(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        # Get party
+        party = get_object_or_404(Party, pk=pk)
+        print(party)
+        # Get all party members 
+        party_members = party.members.all()
+        print(party_members)
+        # Get all movies 
+        party_movies = PartyMovie.objects.filter(party=party)
+        serializer = PartyMovieSerializer(party_movies, many=True)
+        return Response({'Movies in party': serializer.data})
 

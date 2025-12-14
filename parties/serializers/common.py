@@ -3,6 +3,7 @@ from parties.models import Party, PartyMovie
 from movies.models import Movie
 from users.models import User
 from users.serializers.common import UserSerializer
+from movies.serializers.common import MovieSerializer
 
 
 class PartySerializer(ModelSerializer):
@@ -17,7 +18,7 @@ class PartySerializer(ModelSerializer):
 
 class PartyMovieSerializer(ModelSerializer):
         party = PrimaryKeyRelatedField(queryset=Party.objects.all())
-        movie = PrimaryKeyRelatedField(queryset=Movie.objects.all())
+        movie = MovieSerializer()
         added_by_user = PrimaryKeyRelatedField(queryset=User.objects.all())
 
         class Meta:
