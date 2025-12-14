@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response 
 from rest_framework.permissions import IsAuthenticated
-from .models import Party, PartyMovie
+from .models import Party, PartyMovie, Vote
 from rest_framework.exceptions import NotFound
 from .serializers.common import PartySerializer, PartyMovieSerializer
 from django.db.models import Q
@@ -137,4 +137,42 @@ class PartyMovieIndex(APIView):
         party_movies = PartyMovie.objects.filter(party=party)
         serializer = PartyMovieSerializer(party_movies, many=True)
         return Response({'Movies in party': serializer.data})
+    
 
+class VotesIndexView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        # Get party
+        party = get_object_or_404(Party, pk=pk)
+        print(party)
+        # Get all party members 
+        party_members = party.members.all()
+        print(party_members)
+        # Get all movies 
+        party_movies = PartyMovie.objects.filter(party=party)
+        serializer = PartyMovieSerializer(party_movies, many=True)
+        return Response({'Movies in party': serializer.data})
+    
+class CastVotesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, party_id, movie_id):
+        party = get_object_or_404(Party, id=party_id)
+        party_movies = PartyMovie.objects.filter(party=party)
+        # serializer = PartyMovieSerializer(party_movies, many=True)
+        voting_user = request.user
+        print(party)
+        print(party_movies)
+        print(voting_user)
+        vote, created = Vote.objects.get_or_create(user=voting_user, party=party, movie_id=movie_id)
+        if not created:
+            return Response({'Cannot vote twice on the same movie'})
+        return Response({'message': 'You voted'})
+    
+    def delete(self, request, party_id, movie_id):
+        party = get_object_or_404(Party, id=party_id)
+        party_movies = PartyMovie.objects.filter(party=party)
+        voting_user = request.user
+        unvote = Vote.objects.get(user=voting_user, party=party, movie_id=movie_id).delete()
+        return Response({'message': 'Vote removed successfully'})
