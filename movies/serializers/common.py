@@ -7,4 +7,9 @@ class MovieSerializer(ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = '__all__'
+        fields = ['id',
+                  'tmdb_id',
+                  'title',
+                  'poster',
+                  'release_date',
+                  ]
