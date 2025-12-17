@@ -1,6 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .serializers.common import UserSerializer
+from .serializers.common import UserSerializer, BasicUserSerializer
 from rest_framework.permissions import IsAuthenticated
 
 # Create your views here.
@@ -18,5 +18,5 @@ class AccountView(APIView):
         # user = request.user - user Model
         # print(user.username) - prints: 'test'
         # print(user.email) - prints: 'email@email.com'
-        serializer = UserSerializer(request.user)
+        serializer = BasicUserSerializer(request.user)
         return Response(serializer.data)

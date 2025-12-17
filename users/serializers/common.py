@@ -27,3 +27,8 @@ class UserSerializer(serializers.ModelSerializer):
         password_validation.validate_password(password)
         data['password'] = hashers.make_password(password)
         return data
+
+class BasicUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'email']
