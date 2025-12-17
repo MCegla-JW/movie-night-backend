@@ -56,7 +56,7 @@ class PartyIndex(APIView):
         if PartyMovie.objects.filter(party=created_party, movie=movie_to_add.movie).exists():
             return Response({'message': 'Cannot add duplicate movies. Movie aleady in party'})
         movie_to_add, created = PartyMovie.objects.get_or_create(party=created_party, movie=movie_to_add.movie, defaults={'added_by_user': request.user})
-        is_valid = serializer_party_movie.is_valid(raise_exception=True)
+        # is_valid = serializer_party_movie.is_valid(raise_exception=True)
         # movie_to_add = serializer_party_movie.save()
         updated_serializer = PartySerializer(created_party)
         return Response(updated_serializer.data, 201)

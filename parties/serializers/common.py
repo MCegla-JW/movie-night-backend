@@ -1,11 +1,9 @@
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
-from parties.models import Party, PartyMovie, Vote
-from movies.models import Movie
+from parties.models import Party, PartyMovie
 from users.models import User
 from users.serializers.common import UserSerializer
 from movies.serializers.common import MovieSerializer
 from rest_framework import serializers
-from django.db.models import Q, Count, Max
 
 
 class PartySerializer(ModelSerializer):
