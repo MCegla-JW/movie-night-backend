@@ -6,6 +6,9 @@ class Movie(models.Model):
     title = models.CharField(max_length=100)
     poster = models.URLField(blank=True, null=True)
     release_date = models.IntegerField()
+    backdrop = models.URLField(blank=True, null=True) # backdrop formodal 
+    overview = models.TextField(blank=True, null=True) # synopsys
+    rating = models.FloatField(blank=True, null=True) # vote_average
 
     def __str__(self):
         return self.title

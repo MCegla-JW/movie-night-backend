@@ -49,8 +49,18 @@ class WatchlistItemsView(APIView):
         title = data['title']
         poster = data['poster_path']
         release_date = data['release_date'][:4] # as i just want the year as integer 
+        backdrop = data.get('backdrop_path')
+        overview = data.get('overview')
+        rating = data.get('vote_average')
         # retreive movie from TMDB database and save to Movie table
-        movie, created = Movie.objects.get_or_create(tmdb_id=tmdb_id, defaults={'title': title, 'poster': poster, 'release_date': release_date})
+        movie, created = Movie.objects.get_or_create(tmdb_id=tmdb_id) 
+        movie.title = title
+        movie.poster = poster
+        movie.release_date = release_date
+        movie.backdrop = backdrop
+        movie.overview = overview
+        movie.rating = rating
+        movie.save()
         if created: 
             print('A new movie was added to table')
         else:
