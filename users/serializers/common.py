@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from ..models import User 
 from django.contrib.auth import password_validation, hashers
+from django.core.validators import validate_email
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
@@ -15,6 +16,12 @@ class UserSerializer(serializers.ModelSerializer):
             'password',
             'confirm_password'
         ]
+
+    def validate_email(self, value):
+        try:
+            validate_email(value)
+        except serializers.ValidationError:
+            raise serializers.ValidationError('Enter a valid email address')
 
     def validate(self, data):
         password = data['password']
