@@ -54,8 +54,6 @@ else:
         env('DEPLOYED_BACKEND_URL'), # Deployed backend url only
     ]
 
-ALLOWED_HOSTS = []
-
 
 # Application definition
 
