@@ -22,6 +22,7 @@ class UserSerializer(serializers.ModelSerializer):
             validate_email(value)
         except serializers.ValidationError:
             raise serializers.ValidationError('Enter a valid email address')
+        return value
 
     def validate(self, data):
         password = data['password']

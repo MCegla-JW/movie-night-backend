@@ -113,13 +113,17 @@ class PartyJoinView(APIView):
         users_in_party = party.members.filter(id = user_to_join.id).exists()
         print(users_in_party)
         # verify user member or not 
-        if users_in_party:
+        if users_in_party == True:
+            print('User already in Party')
             return Response({'message': 'Party member already exists', 'party_id': party.id})
         party.members.add(user_to_join)
+        print('Member added!')
         movie_to_add = Watchlist.objects.filter(user = request.user.id).order_by("?").first()
         if not movie_to_add:
-            return Response({'message': 'Watchlist empty. Add movies first', 'psrty_id': party.id})
+            return Response({'message': 'Watchlist empty. Add movies first', 'party_id': party.id})
         party_movie, created = PartyMovie.objects.get_or_create(party=party, movie=movie_to_add.movie, defaults={'added_by_user': user_to_join})
+        print(movie_to_add.movie)
+        print(party_movie)
         if not created:
             return Response({'message': 'Cannot add duplicate movies. Movie aleady in party', 'party_id': party.id})
         serializer = PartySerializer(party)
