@@ -308,3 +308,7 @@ Prerequisites
 | 4. Create a `.env` file with the following variables | `SECRET_KEY=your_django_secret_key` <br> `DEBUG=True` <br> `DATABASE_URL=postgres://user:password@host:port/dbname` <br> `TMDB_API_KEY=your_tmdb_api_key` <br> `TMDB_BEARER_TOKEN=your_tmdb_bearer_token` |
 | 5. Create a superuser (optional, for admin access) | `python manage.py createsuperuser` |
 | 6. Start the development server | `python manage.py runserver` |
+
+Note: Replace all `your_...` values with your own credentials.  
+Sensitive keys are intentionally not included in the repository.
+
