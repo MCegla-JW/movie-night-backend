@@ -4,7 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Party, PartyMovie, Vote
 from rest_framework.exceptions import NotFound
 from .serializers.common import PartySerializer, PartyMovieSerializer
-from django.db.models import Q, Count, Max
+from django.db.models import Q
 import uuid
 from movies.models import Watchlist
 from django.shortcuts import get_object_or_404
@@ -187,7 +187,7 @@ class VotesIndexView(APIView):
                         for pm in tied_movies
                     ]
                 }    
-        serializer = PartyMovieSerializer(party_movies, many=True,context={'max_votes': max_votes})
+        serializer = PartyMovieSerializer(party_movies, many=True,context={'max_votes': max_votes, 'request': request})
         return Response({'movies': serializer.data, 'winner': winner, 'is_creator': request.user == party.creator})
     
 class BreakTieView(APIView):
